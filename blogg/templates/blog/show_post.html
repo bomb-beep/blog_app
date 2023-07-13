@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block header %}
+	<h1>{% block title %}{{post["tittel"]}}{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+	<article class="post">
+		<header>
+			<div>
+				<div class="about">av {{post["brukernavn"]}} paa {{post["dato_postet"]}}</div>
+			</div>
+			{% if g.user and g.user["id"] == post["bruker_id"] %}
+				<a class="action" href="{{url_for('blog.update',id=post['id'])}}">Rediger</a>
+			{% endif %}
+		</header>
+		<p class="body">{{post["innhold"]}}</p>
+	</article>
+
+	{% for comment in comments %}
+		<article class="post">
+			<header>
+				<div class="about">fra {{comment["brukernavn"]}} paa {{comment["dato_postet"]}}</div>
+				{% if g.user["id"] == comment["bruker_id"] %}
+					
+				{% endif %}
+			</header>
+			<p class="body">{{comment["innhold"]}}</p>
+		</article>
+	{% endfor %}
+
+	{% if g.user %}
+		<a class="action" href="{{url_for('blog.create_comment',id=post['id'])}}">Kommenter</a>
+	{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block header %}
+	<h1>Ny Innlegg</h1>
+{% endblock %}
+
+{% block content %}
+	<form method="post">
+		<label for="title">Tittel</label>
+		<input name="title" id="title" value="{{request.form['title']}}" >
+		<label for="body">Body</label>
+		<textarea name="body" id="body">{{request.form['body']}}</textarea>
+		<input type="submit" name="Post" value="Post">
+	</form>
+	<form action="{{url_for('blog.index')}}">
+		<input type="submit" value="Cancel">
+	</form>
+{% endblock %}

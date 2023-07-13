@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block header %}
+	<h1>Index</h1>
+	{% if g.user %}
+		<a class="action" href="{{url_for('blog.create')}}">Ny Innlegg</a>
+	{% endif %}
+{% endblock %}
+
+{% block content %}
+	{% for post in posts %}
+		<article class="post">
+			<header>
+				<div>
+					<h1><a href="{{url_for('blog.show_post',id=post['id'])}}">{{post["tittel"]}}</a></h1>
+					<div class="about">av {{post["brukernavn"]}} paa {{post["dato_postet"]}}</div>
+				</div>
+				{% if g.user and g.user["id"] == post["bruker_id"] %}
+					<a class="action" href="{{url_for('blog.update',id=post['id'])}}">Rediger</a>
+				{% endif %}
+			</header>
+			<p class="body">{{post["innhold"]}}</p>
+			<div class="about">{{post["ant_kommentar"]}} kommentar</div>
+		</article>
+		{% if not loop.last %}<hr>{% endif %}
+	{% endfor %}
+{% endblock %}
