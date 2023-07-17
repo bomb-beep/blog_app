@@ -1,8 +1,41 @@
 from flask import (Blueprint,g,request,flash,render_template,redirect,url_for,session,abort)
-from backend.auth import add_user,login_user,get_user
+from backend.auth import add_user,login_user,get_user,set_admin,get_user_from_name
 import functools
 
 bp = Blueprint("auth",__name__,"/auth")
+
+@bp.before_app_request
+def load_logged_in_user():
+	user_id = session.get("user_id")
+
+	if user_id is None:
+		g.user = None
+	else:
+		g.user = get_user(user_id)
+		if g.user == None:
+			return abort(403)
+		
+def login_required(view):
+	@functools.wraps(view)
+	def wrapped_view(**kwargs):
+		if g.user is None:
+			return abort(401)
+		else:
+			return view(**kwargs)
+		
+	return wrapped_view
+
+def admin_required(view):
+	@functools.wraps(view)
+	def wrapped_view(**kwargs):
+		if g.user is None:
+			return abort(401)
+		elif g.user["er_admin"] == 0:
+			return abort(403)
+		else:
+			return view(**kwargs)
+		
+	return wrapped_view
 
 @bp.route("/register",methods=("GET","POST"))
 def register():
@@ -66,35 +99,24 @@ def logout():
 
 	return redirect(url_for("index"))
 
-@bp.before_app_request
-def load_logged_in_user():
-	user_id = session.get("user_id")
+@bp.route("/administrator",methods=("GET","POST"))
+@admin_required
+def administrator():
+	if request.method == "POST":
+		username = request.form["username"]
+		admin = bool(int(request.form["admin"]))
+		error = None
 
-	if user_id is None:
-		g.user = None
-	else:
-		g.user = get_user(user_id)
-		if g.user == None:
-			return abort(403)
-		
-def login_required(view):
-	@functools.wraps(view)
-	def wrapped_view(**kwargs):
-		if g.user is None:
-			return abort(401)
-		else:
-			return view(**kwargs)
-		
-	return wrapped_view
+		if not username:
+			error = "Username required"
+		elif admin == None:
+			error = "Oppgi admin status"
 
-def admin_required(view):
-	@functools.wraps(view)
-	def wrapped_view(**kwargs):
-		if g.user is None:
-			return abort(401)
-		elif g.user["er_admin"] == 0:
-			return abort(403)
-		else:
-			return view(**kwargs)
-		
-	return wrapped_view
+		if not error:
+			print(username,admin,request.form["admin"])
+			set_admin(get_user_from_name(username)["id"],admin)
+			return redirect(url_for("index"))
+
+		flash(error)
+
+	return render_template("auth/administrator.html")

@@ -36,3 +36,5 @@ add_comment("XD XD",post,guest_user)
 comment = get_comment(1)
 assert comment["innhold"] == "XD XD"
 print(list(comment))
+
+print("\n\n!!! Backend tests complete !!!\n\n")

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block header %}
+	<h1>{% block title %}Opprett eller fjern admin{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<p>Lag administrator?</p>
+	<form method="post">
+		<label for="username">Brukernavn</label>
+		<input name="username" id="username" required>
+		<label for="yes">Ja</label>
+		<input type="radio" name="admin" id="yes" value="1">
+		<label for="no">Nei</label>
+		<input type="radio" name="admin" id="no" value="0">
+		<input type="submit" value="Submit">
+	</form>
+{% endblock %}

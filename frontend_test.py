@@ -1,39 +1,6 @@
 from requests import get,post
 import backend_test
 
-def test(method,request,args = {}):
-	# if request[-1] != "/":
-	# 	request = request + "/"
-	print(f"--{request}--")
-	response = method("http://127.0.0.1:5000/"+request,json=args)
-	print(f"Status code: {response.status_code}")
-	print(f"Content-type: {response.headers['Content-type']}")
-	if response.headers["Content-type"] == "application/json":
-		print(f"{response.json()}\n")
-	elif "text/html" in response.headers["Content-type"]:
-		print(f"{response.text}\n")
-	else:
-		print(f"{response.content}\n")
-	return response.status_code
-
-def check(request,expected_response=None):
-	# if request[-1] != "/":
-	# 	request = request + "/"
-	print(f"check {request}")
-	response = get("http://127.0.0.1:5000/"+request)
-	if expected_response is not None:
-		print(f"Expected response: {expected_response},  actual response: {response}")
-	if response.content is None:
-		print(f"{response.status_code}")
-	elif response.headers["Content-type"] == "application/json":
-		print(f"Status code: {response.status_code}\n{response.json()}\n\n")
-	else:
-		print(f"Status code: {response.status_code}\n{response.content}\n\n")
-	return response.status_code
-
-# check("login")
-# test(get,"login")
-# test(post,"login")
 print("\nFrontend Test\n")
 print("Checking url")
 url = "http://127.0.0.1:5000/"
@@ -106,22 +73,28 @@ response = post(url+"2/comment",data={"body":"!!!"},cookies=bot_session)
 print("Status code:",response.status_code)
 
 print("\nTesting register user")
-response = post(url+"register",data={"username":"bruker2","password":"passord123"})
+response = post(url+"register",data={"username":"mod","password":"passord123"})
 if response.history:
 	assert "session" in response.history[0].cookies
-	bruker_session = response.history[0].cookies
+	mod_session = response.history[0].cookies
 else:
 	assert "session" in response.cookies
-	bruker_session = response.cookies
-assert "bruker2" in get(url,cookies=bruker_session).text
-response = post(url+"2/comment",data={"body":"kommentar"},cookies=bruker_session)
+	mod_session = response.cookies
+assert "mod" in get(url,cookies=mod_session).text
+response = post(url+"2/comment",data={"body":"kommentar"},cookies=mod_session)
 assert 200 == response.status_code
-assert "fra bruker2" in get(url+"2").text
-# form = {"username":"sjef","password":"passord123"}
-# response = post(url+"login",data=form)
-# print(response.status_code)
-# session = response.cookies
-# print(session)
+assert "fra mod" in get(url+"2").text
 
-# response = get(url+"",cookies=session)
-# print(response.status_code,response.text)
+print("\nTesting set admin")
+response = get(url+"administrator",cookies=mod_session)
+assert 403 == response.status_code
+response = get(url+"administrator",cookies=sjef_session)
+assert 200 == response.status_code
+response = post(url+"administrator",data={"username":"mod","admin":"1"},cookies=sjef_session)
+post(url+"create",data={"title":"Ny moderator","body":"Hei allesammen!"},cookies=mod_session)
+assert 200 == get(url+"3").status_code
+response = post(url+"administrator",data={"username":"mod","admin":"0"},cookies=sjef_session)
+post(url+"create",data={"title":"Moderator","body":"Forste dag paa job!"},cookies=mod_session)
+assert 404 == get(url+"4").status_code
+
+print("\n\n\n!!! Frontend tests complete !!!")

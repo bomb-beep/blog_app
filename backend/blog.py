@@ -21,7 +21,7 @@ def get_all_posts():
     posts = get_db().execute("SELECT i.id,tittel,i.innhold,i.dato_postet,brukernavn,i.bruker_id, "
                              "COUNT(k.id) AS ant_kommentar "
                        "FROM innlegg i JOIN brukere b ON i.bruker_id = b.id "
-                       "JOIN kommentar k on k.innlegg_id = i.id "
+                       "LEFT JOIN kommentar k on k.innlegg_id = i.id "
                        "GROUP BY i.id "
                        "ORDER BY i.dato_postet DESC "
                        ).fetchall()

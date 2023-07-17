@@ -11,6 +11,12 @@ def add_user(name,password,admin = 0):
 		return f"Username {name} is already registered"
 	else:
 		return None
+	
+def set_admin(id,admin):
+	print(admin,id)
+	db = get_db()
+	db.execute("UPDATE brukere SET er_admin = ? WHERE id = ?",(admin,id))
+	db.commit()
     
 def login_user(name,password):
 	user = get_db().execute("SELECT * FROM brukere "
@@ -28,5 +34,13 @@ def get_user(id):
 		"SELECT * FROM brukere "
 		"WHERE id = ?",
 		(id,)
+	).fetchone()
+	return user
+
+def get_user_from_name(name):
+	user = get_db().execute(
+		"SELECT * FROM brukere "
+		"WHERE brukernavn = ?",
+		(name,)
 	).fetchone()
 	return user
