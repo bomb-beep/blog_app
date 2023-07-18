@@ -1,5 +1,6 @@
 from flask import (Blueprint,g,request,flash,render_template,redirect,url_for,abort)
-from backend.blog import get_all_posts,add_post,get_post,get_comments_from_post,add_comment
+from backend.blog import (get_all_posts,add_post,get_post,get_comments_from_post,
+			  add_comment,edit_post,delete_post,edit_comment,delete_comment_backend,get_comment)
 from blogg.auth import login_required,admin_required
 
 bp = Blueprint("blog",__name__,"/blog")
@@ -41,6 +42,8 @@ def create():
 @login_required
 def create_comment(id):
 	post = get_post(id)
+	if not post:
+		return abort(404)
 	if request.method=="POST":
 		body=request.form["body"]
 		error=None
@@ -56,7 +59,70 @@ def create_comment(id):
 			flash(error)
 	return render_template("blog/create_comment.html",post=post)
 
-@bp.route("/update/<int:id>")
+@bp.route("/<int:id>/update",methods=("GET","POST"))
 @login_required
 def update(id):
-	pass
+	if not g.user:
+		return abort(401)
+	post = get_post(id)
+	if not post:
+		return abort(404)
+	if post["bruker_id"] != g.user["id"]:
+		return abort(403)
+	
+	if request.method == "POST":
+		body = request.form["body"]
+		error = None
+
+		edit_post(id,body,g.user)
+		return redirect(url_for("blog.show_post",id=id))
+	
+	return render_template("blog/update.html",post=post)
+
+@bp.route("/<int:id>/delete")
+@admin_required
+def delete(id):
+	if not g.user:
+		return abort(401)
+	post = get_post(id)
+	if not post:
+		return abort(404)
+	if post["bruker_id"] != g.user["id"]:
+		return abort(403)
+	
+	delete_post(id,g.user)
+	return redirect(url_for("index"))
+	
+@bp.route("/comment/<int:id>/update",methods=("GET","POST"))
+@login_required
+def update_comment(id):
+	if not g.user:
+		return abort(401)
+	post = get_comment(id)
+	if not post:
+		return abort(404)
+	if not (g.user["er_admin"] == True or post["bruker_id"] == g.user["id"]):
+		return abort(403)
+	
+	if request.method == "POST":
+		body = request.form["body"]
+		error = None
+
+		edit_comment(id,body,g.user)
+		return redirect(url_for("blog.show_post",id=post["innlegg_id"]))
+	
+	return render_template("blog/update_comment.html",post=post)
+
+@bp.route("/comment/<int:id>/delete")
+@login_required
+def delete_comment(id):
+	if not g.user:
+		return abort(401)
+	post = get_comment(id)
+	if not post:
+		return abort(404)
+	if not (g.user["er_admin"] == True or post["bruker_id"] == g.user["id"]):
+		return abort(403)
+	
+	delete_comment_backend(id,g.user)
+	return redirect(url_for("blog.show_post",id=post["innlegg_id"]))

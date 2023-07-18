@@ -13,7 +13,6 @@ def add_user(name,password,admin = 0):
 		return None
 	
 def set_admin(id,admin):
-	print(admin,id)
 	db = get_db()
 	db.execute("UPDATE brukere SET er_admin = ? WHERE id = ?",(admin,id))
 	db.commit()

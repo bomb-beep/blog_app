@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 
 {% block header %}
-	<h1>{% block title %}Rediger {{post["tittel"]}} {% endblock %}</h1>
+	<h1>{% block title %}Rediger kommentar{% endblock %} </h1>
 {% endblock %}
 
 {% block content %}
-	
 	<form method="post">
 		<textarea name="body" id="body">{{post['innhold']}}</textarea>
 		<input type="submit" value="Save">
 	</form>
 	<hr>
-	<form action="{{url_for('blog.delete',id=post['id'])}}">
+	<form action="{{url_for('blog.delete_comment',id=post['id'])}}">
 		<input class="danger" type="submit" value="Delete" onclick="return confirm('Er du sikker du vil slette?');">
 	</form>
 {% endblock %}

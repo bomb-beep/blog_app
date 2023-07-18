@@ -113,7 +113,6 @@ def administrator():
 			error = "Oppgi admin status"
 
 		if not error:
-			print(username,admin,request.form["admin"])
 			set_admin(get_user_from_name(username)["id"],admin)
 			return redirect(url_for("index"))
 

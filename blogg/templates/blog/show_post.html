@@ -21,7 +21,7 @@
 			<header>
 				<div class="about">fra {{comment["brukernavn"]}} paa {{comment["dato_postet"]}}</div>
 				{% if g.user["id"] == comment["bruker_id"] %}
-					
+					<a class="action" href="{{url_for('blog.update_comment',id=comment['id'])}}">Rediger</a>
 				{% endif %}
 			</header>
 			<p class="body">{{comment["innhold"]}}</p>

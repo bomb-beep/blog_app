@@ -9,7 +9,21 @@ def add_post(title,content,user):
                    "(?,?,?)",
                    (title,content,user["id"]))
         db.commit()
-        
+
+def edit_post(id,content,user):
+    post = get_post(id)
+    if post["bruker_id"] == user["id"]:
+        db = get_db()
+        db.execute("UPDATE innlegg SET innhold = ? WHERE id = ?",(content,id))
+        db.commit()
+
+def delete_post(id,user):
+    post = get_post(id)
+    if post["bruker_id"] == user["id"]:
+        db = get_db()
+        db.execute("DELETE FROM innlegg WHERE id = ?",(id,))
+        db.commit()
+
 def get_post(id):
     post = get_db().execute(
         "SELECT i.id,tittel,innhold,dato_postet,brukernavn,bruker_id "
@@ -46,3 +60,17 @@ def get_comments_from_post(id):
         "FROM kommentar k JOIN brukere b on bruker_id = b.id WHERE innlegg_id = ?",
         (id,)).fetchall()
     return comments
+
+def edit_comment(id,content,user):
+    post = get_comment(id)
+    if user["er_admin"] == True or post["bruker_id"] == user["id"]:
+        db = get_db()
+        db.execute("UPDATE kommentar SET innhold = ? WHERE id = ?",(content,id))
+        db.commit()
+
+def delete_comment_backend(id,user):
+    post = get_comment(id)
+    if user["er_admin"] == True or post["bruker_id"] == user["id"]:
+        db = get_db()
+        db.execute("DELETE FROM kommentar WHERE id = ?",(id,))
+        db.commit()

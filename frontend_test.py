@@ -97,4 +97,27 @@ response = post(url+"administrator",data={"username":"mod","admin":"0"},cookies=
 post(url+"create",data={"title":"Moderator","body":"Forste dag paa job!"},cookies=mod_session)
 assert 404 == get(url+"4").status_code
 
+print("\nTesting update post")
+post(url+"2/update",data={"body":"oppdatert innhold"},cookies=mod_session)
+assert "oppdatert" not in get(url+"2").text
+post(url+"2/update",data={"body":"oppdatert innhold"},cookies=sjef_session)
+assert "oppdatert" in get(url+"2").text
+
+print("\nTesting delete post")
+post(url+"create",data={"title":"delete","body":"this"},cookies=sjef_session)
+assert 200 == get(url+"4").status_code
+get(url+"4/delete",cookies=mod_session)
+assert 200 == get(url+"4").status_code
+get(url+"4/delete",cookies=sjef_session)
+assert 404 == get(url+"4").status_code
+
+print("\nTesting delete comment")
+post(url+"1/comment",data={"body":"kjop xxx"},cookies=bot_session)
+assert "kjop xxx" in get(url+"1").text
+get(url+"comment/4/delete",cookies=mod_session)
+assert "kjop xxx" in get(url+"1").text
+get(url+"comment/4/delete",cookies=sjef_session)
+assert "kjop xxx" not in get(url+"1").text
+
+
 print("\n\n\n!!! Frontend tests complete !!!")
